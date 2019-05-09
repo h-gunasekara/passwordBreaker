@@ -5,12 +5,11 @@
 #include <string.h>
 #include <stdlib.h>
 
-static const char alphabet[] =
-"abcdefghijklmnopqrstuvwxyz"
-"ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-"0123456789";
+static const char alphabet[126 - 32 + 1];
 
 static const int alphabetSize = sizeof(alphabet) - 1;
+
+alphabet();
 
 void bruteImpl(char* str, int index, int maxDepth)
 {
@@ -36,8 +35,18 @@ void bruteSequential(int maxLen)
     free(buf);
 }
 
+void alphabet()
+{
+  for( int i = 32; i <= 126; i++ )
+  {
+      alphabet[i-32] = (char) i;
+  }
+  alphabet[126 - 32 + 1] = '\0';
+}
+
 int main(int argc, char * argv[])
 {
+  alphabet();
   if (argc == 1){
     bruteSequential(4);
     return 0;
