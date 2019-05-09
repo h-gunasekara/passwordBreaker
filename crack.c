@@ -4,8 +4,9 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "proj-2_sha256.c"
 
-static const char alphabet[126 - 32 + 1];
+char alphabet[126 - 32 + 1];
 
 static const int alphabetSize = sizeof(alphabet) - 1;
 
@@ -24,14 +25,10 @@ void bruteImpl(char* str, int index, int maxDepth)
 
 void bruteSequential(int maxLen)
 {
+  // makes a string of max length (4)
     char* buf = malloc(maxLen + 1);
-
-    for (int i = 1; i <= maxLen; ++i)
-    {
-        memset(buf, 0, maxLen + 1);
-        bruteImpl(buf, 0, i);
-    }
-
+    memset(buf, 0, maxLen + 1);
+    bruteImpl(buf, 0, maxLen);
     free(buf);
 }
 
