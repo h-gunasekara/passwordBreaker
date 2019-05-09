@@ -9,7 +9,7 @@ static const char alphabet[126 - 32 + 1];
 
 static const int alphabetSize = sizeof(alphabet) - 1;
 
-alphabet();
+void alphabet();
 
 void bruteImpl(char* str, int index, int maxDepth)
 {
