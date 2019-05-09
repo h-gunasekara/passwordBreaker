@@ -9,7 +9,7 @@ static const char alphabet[126 - 32 + 1];
 
 static const int alphabetSize = sizeof(alphabet) - 1;
 
-void alphabet();
+void getAlphabet();
 
 void bruteImpl(char* str, int index, int maxDepth)
 {
@@ -35,7 +35,7 @@ void bruteSequential(int maxLen)
     free(buf);
 }
 
-void alphabet()
+void getAlphabet()
 {
   for( int i = 32; i <= 126; i++ )
   {
@@ -46,7 +46,7 @@ void alphabet()
 
 int main(int argc, char * argv[])
 {
-  alphabet();
+  getAlphabet();
   if (argc == 1){
     bruteSequential(4);
     return 0;
