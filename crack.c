@@ -10,7 +10,42 @@ char alphabet[126 - 32 + 1];
 
 static const int alphabetSize = sizeof(alphabet) - 1;
 
+typedef unsigned char BYTE;
+SHA256_CTX ctx;
+BYTE buf[SHA256_BLOCK_SIZE];
+
+void ByteArray2SHA(char* str);
+void string2ByteArray(char* input, BYTE* output);
 void getAlphabet();
+
+void ByteArray2SHA(char* str)
+{
+    int len = strlen(str);
+    BYTE hash[len];
+    string2ByteArray(str, hash);
+    sha256_init(&ctx);
+    sha256_update(&ctx, hash, len);
+    sha256_final(&ctx, buf);
+    for (int k = 0; k < SHA256_BLOCK_SIZE; ++k) {
+      printf("%02x", buf[k]);
+    }
+    printf("\n");
+}
+
+//function to convert string to byte array
+void string2ByteArray(char* input, BYTE* output)
+{
+    int loop;
+    int i;
+
+    loop = 0;
+    i = 0;
+
+    while(input[loop] != '\0')
+    {
+        output[i++] = input[loop++];
+    }
+}
 
 void bruteImpl(char* str, int index, int maxDepth)
 {
@@ -18,8 +53,11 @@ void bruteImpl(char* str, int index, int maxDepth)
     {
         str[index] = alphabet[i];
 
-        if (index == maxDepth - 1) printf("%s\n", str);
-        else bruteImpl(str, index + 1, maxDepth);
+        if (index == maxDepth - 1){
+          printf("string %s converts to: ", str);
+          ByteArray2SHA(str);
+
+        }else bruteImpl(str, index + 1, maxDepth);
     }
 }
 
