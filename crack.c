@@ -13,10 +13,38 @@ static const int alphabetSize = sizeof(alphabet) - 1;
 typedef unsigned char BYTE;
 SHA256_CTX ctx;
 BYTE buf[SHA256_BLOCK_SIZE];
+FILE *fp;
+BYTE buffer[32];
 
+
+
+void checkPwd4sha256(char* guess);
 void ByteArray2SHA(char* str);
 void string2ByteArray(char* input, BYTE* output);
 void getAlphabet();
+
+void checkPwd4sha256(char* guess){
+  fseek(fp, 0, SEEK_SET);
+  int n;
+  for (int i = 1; i <= 10; ++i)
+  {
+    fread(buffer, 32, 1, fp);
+    n = memcmp(buf, buffer, sizeof(buffer));
+    if(n==0){
+      printf("%s %d\n", guess, i);
+    }
+    // printf("i = %d\n", i);
+    //
+    // for (int k = 0; k < SHA256_BLOCK_SIZE; ++k) {
+    //   printf("%02x", buffer[k]);
+    // }
+    // printf("\n");
+  }
+
+
+
+
+}
 
 void ByteArray2SHA(char* str)
 {
@@ -26,10 +54,7 @@ void ByteArray2SHA(char* str)
     sha256_init(&ctx);
     sha256_update(&ctx, hash, len);
     sha256_final(&ctx, buf);
-    for (int k = 0; k < SHA256_BLOCK_SIZE; ++k) {
-      printf("%02x", buf[k]);
-    }
-    printf("\n");
+
 }
 
 //function to convert string to byte array
@@ -54,8 +79,13 @@ void bruteImpl(char* str, int index, int maxDepth)
         str[index] = alphabet[i];
 
         if (index == maxDepth - 1){
-          printf("string %s converts to: ", str);
+          //printf("string %s converts to: ", str);
           ByteArray2SHA(str);
+          // for (int k = 0; k < SHA256_BLOCK_SIZE; ++k) {
+          //   printf("%02x", buf[k]);
+          // }
+          //printf("\n");
+          checkPwd4sha256(str);
 
         }else bruteImpl(str, index + 1, maxDepth);
     }
@@ -83,7 +113,9 @@ int main(int argc, char * argv[])
 {
   getAlphabet();
   if (argc == 1){
+    fp = fopen("pwd4sha256", "r");
     bruteSequential(4);
+    fclose(fp);
     return 0;
   }
 
