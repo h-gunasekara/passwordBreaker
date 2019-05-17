@@ -1,14 +1,13 @@
 /*
-** Title: image_tagger.c
-** Author: Hamish Gunasekara
-** Adapted from http-server.c
+* select-server.c -- a cheezy multiperson chat server
+* For Q1.1
 */
 
 #include <errno.h>
-#include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
+#include <math.h>
+
 
 #include <arpa/inet.h>
 #include <fcntl.h>
@@ -16,45 +15,34 @@
 #include <netinet/in.h>
 #include <strings.h>
 #include <sys/select.h>
-#include <sys/sendfile.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
 
-// constants
-static char const * const HTTP_200_FORMAT = "HTTP/1.1 200 OK\r\n\
-Content-Type: text/html\r\n\
-%s\
-Content-Length: %ld\r\n\r\n";
-static char const * const HTTP_400 = "HTTP/1.1 400 Bad Request\r\nContent-Length: 0\r\n\r\n";
-static int const HTTP_400_LENGTH = 47;
-static char const * const HTTP_404 = "HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\n\r\n";
-static int const HTTP_404_LENGTH = 45;
+#define PORT 7800
+
+int diffie();
 
 
-// represents the types of method.
-typedef enum
-{
-    GET,
-    POST,
-    UNKNOWN
-} METHOD;
+long g = 15;
+long p = 97;
+long b = 93;
 
+int diffie(){
+  printf("hgunasekara\n");
+  long coef = pow(g, b);
+  long final = coef % p;
+  char str[10];
+  sprintf(str, "%ld", final);
+  printf("%c", str[0]);
+  printf("%c", str[1]);
+  printf("\n");
+  return 1;
+}
 
-// Starting image.
-int img = 1;
-
-static bool send_page(int sockfd, int n, char* buff, char* page, player_t* players);
 
 int main(int argc, char * argv[])
 {
-    if (argc < 3)
-    {
-        fprintf(stderr, "usage: %s ip port\n", argv[0]);
-        return 0;
-    }
-
     // create TCP socket which only accept IPv4
     int sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
@@ -75,9 +63,8 @@ int main(int argc, char * argv[])
     struct sockaddr_in serv_addr;
     bzero(&serv_addr, sizeof(serv_addr));
     serv_addr.sin_family = AF_INET;
-    // if ip parameter is not specified
-    serv_addr.sin_addr.s_addr = inet_addr(argv[1]);
-    serv_addr.sin_port = htons(atoi(argv[2]));
+    serv_addr.sin_addr.s_addr = INADDR_ANY;
+    serv_addr.sin_port = htons(PORT);
 
     // bind address to socket
     if (bind(sockfd, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
@@ -95,7 +82,7 @@ int main(int argc, char * argv[])
     FD_SET(sockfd, &masterfds);
     // record the maximum socket number
     int maxfd = sockfd;
-    fprintf(stderr, "image_tagger server is now running at IP: %s on port %s\n", argv[1], argv[2]);
+
     while (1)
     {
         // monitor file descriptors
@@ -136,8 +123,8 @@ int main(int argc, char * argv[])
                         );
                     }
                 }
-                // a request is sent from the client
-                else if (!handle_http_request(i, players))
+                // a message is sent from the client
+                else if (!diffie())
                 {
                     close(i);
                     FD_CLR(i, &masterfds);
@@ -146,116 +133,4 @@ int main(int argc, char * argv[])
     }
 
     return 0;
-}
-
-static bool send_page(int sockfd, int n, char* buff, char* page, player_t* players) {
-  struct stat st;
-  stat(page, &st);
-  // increase file size to accommodate the username
-  long size = st.st_size;
-  int curr_play_num;
-  char temp[2048];
-
-  for (int i = 0; i < 2; ++i)
-  {
-      if (players[i].sockfd == sockfd)
-      {
-          curr_play_num = i;
-      }
-  }
-
-  if (strcmp(page, ACCEPTED) == 0)
-  {
-      size = st.st_size - 2;
-      if (players[curr_play_num].num_guesses != 0)
-      {
-          size += 11;
-          for (int guess = 0; guess < players[curr_play_num].num_guesses; ++guess)
-          {
-              size += strlen(players[curr_play_num].guesses[guess]);
-          }
-      }
-
-  }
-
-  n = sprintf(buff, HTTP_200_FORMAT, "", size);
-
-  if (strcmp(page, START) == 0)
-  {
-      char temp[strlen("Set-Cookie: username=%s\r\n") + MAXKEYLENGTH];
-      sprintf(temp, "Set-Cookie: username=%s\r\n", players[curr_play_num].name);
-      size = st.st_size + players[curr_play_num].name_len  - 1;
-      n = sprintf(buff, HTTP_200_FORMAT, temp, size);
-  }
-
-
-
-  // send the header first
-  if (write(sockfd, buff, n) < 0)
-  {
-      perror("write");
-      return false;
-  }
-
-  // read the content of the HTML file
-  int filefd = open(page, O_RDONLY);
-  n = read(filefd, buff, 2048);
-  if (n < 0)
-  {
-      perror("read");
-      close(filefd);
-      return false;
-  }
-  close(filefd);
-
-  // Add keywords
-  if (strcmp(page, ACCEPTED) == 0)
-  {
-    char guesslist[1000000];
-    strcpy(guesslist, "Keywords: ");
-    for (int i = 0; i < players[curr_play_num].num_guesses; ++i)
-    {
-      if (i == 0){
-        strcat(guesslist, players[curr_play_num].guesses[i]);
-      } else {
-        strcat(guesslist, ", ");
-        strcat(guesslist, players[curr_play_num].guesses[i]);
-      }
-    }
-    n = sprintf(temp, buff, img, guesslist);
-    temp[n] = 0;
-  }
-
-  //changed the picture
-  else if (strcmp(page, INTRO) == 0 || strcmp(page, TURN) == 0 || strcmp(page, DISCARDED) == 0)
-  {
-    n = sprintf(temp, buff, img);
-    temp[n] = 0;
-  }
-
-  // Show Username
-  else if (strcmp(page, START) == 0) {
-    for (int i = 0; i < 2; ++i)
-    {
-      if (players[i].sockfd == sockfd)
-      {
-        n = sprintf(temp, buff, img, players[i].name);
-        temp[n] = 0;
-      }
-    }
-  }
-  else
-  {
-      strcpy(temp, buff);
-  }
-
-
-  if (write(sockfd, temp, size) < 0)
-  {
-      perror("write");
-      return false;
-  }
-
-  return true;
-
 }

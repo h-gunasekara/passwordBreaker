@@ -8,7 +8,7 @@ def password_editor(file):
 
     for word in contents:
         if len(word) < 6:
-            edited_content.append(fill(word))
+            edited_content.extend(fill(word))
         else:
             edited_content.append(word[:6])
 
@@ -19,22 +19,28 @@ def password_editor(file):
             comb_list.append(letter_replace('o', '0', word))
         if 'i' in word:
             comb_list.append(letter_replace('i', '1', word))
+        if 'l' in word:
+            comb_list.append(letter_replace('l', '1', word))
         if 'a' in word:
             comb_list.append(letter_replace('a', '4', word))
+        if 's' in word:
+            comb_list.append(letter_replace('s', '5', word))
     edited_content.extend(comb_list)
 
     # edited_content = list(dict.fromkeys(edited_content))
 
     with open("edited_passwords.txt", 'wb') as myfile:
-        wr = csv.writer(myfile)
+        wr = csv.writer(myfile, delimiter=' ')
         wr.writerow(edited_content)
 
 
 
 def fill(word):
-    numbers = "123456"
+    numbers = "123456789"
     spaces = 6 - len(word)
-    return word + numbers[:spaces]
+    permutes = [''.join(i) for i in itertools.permutations(numbers, spaces)]
+    final = [word + permute for permute in permutes]
+    return final
 
 def numfill(word):
     return
@@ -44,7 +50,6 @@ def case_combinations(word):
 
 def letter_replace(old, new, word):
     return word.replace(old, new)
-
 
 
 
