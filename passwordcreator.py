@@ -18,7 +18,7 @@ def password_editor(file):
     As if its the main function for the passwordcreator.py. The most important thing it does is output a .txt (edited_passwords.txt) file of
     varied passwords.
     Input: "file" - common_passwords.txt from Jun haog
-    Returns: "len(edited_content)" - the number of different passwords I have come up with (1,848,457)
+    Returns: "len(edited_content)" - the number of different passwords I have come up with (3,113,956)
     """
 
     # Splits file words up
@@ -132,6 +132,25 @@ def sub(i, word):
             output.append(new_word)
             sub(i + 1, new_word)
 
+        if 'a' in word[i]:
+            new_word = letter_replace('&', i, word)
+            output.append(new_word)
+            sub(i + 1, new_word)
+
+        if 'l' in word[i]:
+            new_word = letter_replace('|', i, word)
+            output.append(new_word)
+            sub(i + 1, new_word)
+
+        if 'i' in word[i]:
+            new_word = letter_replace('|', i, word)
+            output.append(new_word)
+            sub(i + 1, new_word)
+
+        if 'e' in word[i]:
+            new_word = letter_replace('&', i, word)
+            output.append(new_word)
+            sub(i + 1, new_word)
         sub(i + 1, word)
 
 

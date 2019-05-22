@@ -8,7 +8,7 @@
 #include <stdbool.h>
 
 // this is to store all ASCII characters 32 to 126 (+ 1 for the null byte)
-char alphabet[62 + 1] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890\0";
+char alphabet[63 + 1] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890&\0";
 
 static const int alphabetSize = sizeof(alphabet) - 1;
 
@@ -153,11 +153,11 @@ void bruteImpl(char* str, int index, int maxDepth)
         str[index] = alphabet[i];
         if (index == maxDepth - 1){
           if (infin == false){
-            printf("%s\n", str);
             if (count >= total){
               exit(0);
             }
             count++;
+            printf("%s\n", str);
           } else if (infin == true){
             ByteArray2SHA(str);
             if (maxDepth == 4){

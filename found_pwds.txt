@@ -4,6 +4,7 @@ hgun 7
 lobo 1
 sage 3
 sAge 2
+sag& 6
 tuas 10
 7788 9
 8788 8
