@@ -1,10 +1,22 @@
-7788
-8788
-ailp
-biol
-hgun
-lobo
-sAge
-sag&
-sage
-tuas
+ailp 4
+biol 5
+hgun 7
+lobo 1
+sage 3
+sAge 2
+tuas 10
+7788 9
+8788 8
+just1n 21
+justin 15
+hgunas 29
+devon1 24
+clever 14
+c7ever 27
+devon1 24
+dimens 11
+diosit 13
+dImens 12
+dImEns 23
+dIosit 19
+eaehns 25

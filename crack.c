@@ -5,9 +5,10 @@
 #include <string.h>
 #include <stdlib.h>
 #include "proj-2_sha256.c"
+#include <stdbool.h>
 
 // this is to store all ASCII characters 32 to 126 (+ 1 for the null byte)
-char alphabet[126 - 32 + 1];
+char alphabet[62 + 1] = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890\0";
 
 static const int alphabetSize = sizeof(alphabet) - 1;
 
@@ -24,6 +25,7 @@ char word[6 + 1];
 long fileSize;
 long count = 0;
 long total;
+bool infin;
 
 
 void checkPwd6sha256(char* guess);
@@ -52,9 +54,7 @@ void checkPwd4sha256(char* guess){
     if(n==0){
       printf("%s %d\n", guess, i);
     }
-
   }
-
 }
 
 void checkPwd6sha256(char* guess){
@@ -70,9 +70,7 @@ void checkPwd6sha256(char* guess){
     if(n==0){
       printf("%s %d\n", guess, i + 10);
     }
-
   }
-
 }
 
 
@@ -129,18 +127,17 @@ void outputPasswords(long total){
     printf("%s\n", word);
     count++;
   }
+  infin = false;
   bruteSequential(6);
 }
 
 
 void string2ByteArray(char* input, BYTE* output) {
-  //function to convert string to byte array
+  // function to convert string to byte array
   int loop;
   int i;
-
   loop = 0;
   i = 0;
-
   while(input[loop] != '\0')
   {
       output[i++] = input[loop++];
@@ -150,30 +147,25 @@ void string2ByteArray(char* input, BYTE* output) {
 void bruteImpl(char* str, int index, int maxDepth)
 {
   // recursively goes thought everything in the alphabet in brute force style
+  // Standard brute force
     for (int i = 0; i < alphabetSize; ++i)
     {
         str[index] = alphabet[i];
-
         if (index == maxDepth - 1){
-          //printf("string %s converts to: ", str);
-          // for (int k = 0; k < SHA256_BLOCK_SIZE; ++k) {
-          //   printf("%02x", buf[k]);
-          // }
-          //printf("\n");
-          if (maxDepth == 6){
+          if (infin == false){
+            printf("%s\n", str);
             if (count >= total){
               exit(0);
             }
             count++;
-          }
-          if (maxDepth == 4){
+          } else if (infin == true){
             ByteArray2SHA(str);
-            checkPwd4sha256(str);
-          } else {
-            printf("%s\n", str);
+            if (maxDepth == 4){
+              checkPwd4sha256(str);
+            } else if (maxDepth == 6) {
+              checkPwd6sha256(str);
+            }
           }
-
-
         }else bruteImpl(str, index + 1, maxDepth);
     }
 }
@@ -188,42 +180,41 @@ void bruteSequential(int maxLen)
     free(buf);
 }
 
-void getAlphabet()
-{
-  // interates through alll characters of the ASSCII table
-  for( int i = 32; i <= 126; i++ )
-  {
-      alphabet[i-32] = (char) i;
-  }
-  alphabet[126 - 32 + 1] = '\0';
-}
 
 
 int main(int argc, char* argv[])
 {
-  getAlphabet();
   if (argc == 1){
     // Opens files
-    //fp = fopen("pwd4sha256", "r");
-    //bruteSequential(4);
+    fp = fopen("pwd4sha256", "r");
+    infin = true;
+    bruteSequential(4);
     fp1 = fopen("pwd6sha256", "r");
+    // Opens preprocessed passwords that have been edited with the python script "passwordcreator.py"
     createdPasswords = fopen("edited_passwords.txt", "r");
+    // iterates through createdPasswords and finds the SHA hash then checks it with pwd6sha256
     find6Passwords();
-
+    fclose(createdPasswords);
+    // If the created passwords dont make enough matches then we preform a brute force
+    bruteSequential(6);
+    // closes files
     fclose(fp1);
-    fclose(createdPasswords);
-    //fclose(fp);
+    fclose(fp);
     return 0;
   }
+
   if (argc == 2){
-    // finds total
+    // finds total values to print
     total = atoi(argv[1]);
-    // Opens files
+    // Opens preprocessed passwords that have been edited with the python script "passwordcreator.py"
     createdPasswords = fopen("edited_passwords.txt", "r");
+    // Prints all passwords to the given total
     outputPasswords(total);
+    // closes file
     fclose(createdPasswords);
     return 0;
   }
+
   if (argc == 3){
     // Opens files
     passwordfile = fopen(argv[1], "r");
@@ -232,9 +223,9 @@ int main(int argc, char* argv[])
     fseek(SHApasswordfile, 0 , SEEK_END);
     fileSize = ftell(SHApasswordfile) / 32;
     fseek(SHApasswordfile, 0 , SEEK_SET);
-
+    // sends to password compare to match passwords and SHA
     passwordCompare();
-
+    // closes files
     fclose(passwordfile);
     fclose(SHApasswordfile);
   }
