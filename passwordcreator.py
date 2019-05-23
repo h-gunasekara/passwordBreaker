@@ -132,26 +132,6 @@ def sub(i, word):
             output.append(new_word)
             sub(i + 1, new_word)
 
-        if 'a' in word[i]:
-            new_word = letter_replace('&', i, word)
-            output.append(new_word)
-            sub(i + 1, new_word)
-
-        if 'l' in word[i]:
-            new_word = letter_replace('|', i, word)
-            output.append(new_word)
-            sub(i + 1, new_word)
-
-        if 'i' in word[i]:
-            new_word = letter_replace('|', i, word)
-            output.append(new_word)
-            sub(i + 1, new_word)
-
-        if 'e' in word[i]:
-            new_word = letter_replace('&', i, word)
-            output.append(new_word)
-            sub(i + 1, new_word)
-        sub(i + 1, word)
 
 
 def fill(word):
